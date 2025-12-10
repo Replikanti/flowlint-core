@@ -1,0 +1,177 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://flowlint.dev/schemas/n8n-workflow.json",
+  "title": "n8n Workflow Schema",
+  "description": "JSON Schema for n8n workflow files (v1.x)",
+  "type": "object",
+  "required": ["nodes", "connections"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Workflow name"
+    },
+    "nodes": {
+      "type": "array",
+      "description": "Array of workflow nodes",
+      "items": {
+        "type": "object",
+        "required": ["type", "name"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Unique node identifier"
+          },
+          "type": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Node type (e.g., n8n-nodes-base.httpRequest)"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Human-readable node name"
+          },
+          "parameters": {
+            "type": "object",
+            "description": "Node-specific configuration parameters"
+          },
+          "credentials": {
+            "type": "object",
+            "description": "Credential references for this node"
+          },
+          "position": {
+            "type": "array",
+            "description": "X,Y coordinates for UI placement",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 2,
+            "maxItems": 2
+          },
+          "continueOnFail": {
+            "type": "boolean",
+            "description": "Whether to continue execution on node failure"
+          },
+          "disabled": {
+            "type": "boolean",
+            "description": "Whether the node is disabled"
+          },
+          "notesInFlow": {
+            "type": "boolean"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "typeVersion": {
+            "type": "number",
+            "description": "Version of the node type"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "connections": {
+      "type": "object",
+      "description": "Map of node connections (source node ID -> connection details)",
+      "patternProperties": {
+        "^.*$": {
+          "type": "object",
+          "description": "Connection channels for a source node",
+          "patternProperties": {
+            "^(main|error|timeout|.*?)$": {
+              "description": "Connection array for this channel",
+              "oneOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": ["node"],
+                    "properties": {
+                      "node": {
+                        "type": "string",
+                        "description": "Target node ID or name"
+                      },
+                      "type": {
+                        "type": "string",
+                        "description": "Connection type"
+                      },
+                      "index": {
+                        "type": "number",
+                        "description": "Output index"
+                      }
+                    }
+                  }
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "required": ["node"],
+                      "properties": {
+                        "node": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        },
+                        "index": {
+                          "type": "number"
+                        }
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    "active": {
+      "type": "boolean",
+      "description": "Whether the workflow is active"
+    },
+    "settings": {
+      "type": "object",
+      "description": "Workflow settings"
+    },
+    "tags": {
+      "type": "array",
+      "description": "Workflow tags",
+      "items": {
+        "oneOf": [
+          { "type": "string" },
+          {
+            "type": "object",
+            "required": ["name"],
+            "properties": {
+              "id": { "type": "string" },
+              "name": { "type": "string" }
+            },
+            "additionalProperties": true
+          }
+        ]
+      }
+    },
+    "pinData": {
+      "type": "object",
+      "description": "Pinned execution data for testing"
+    },
+    "versionId": {
+      "type": "string",
+      "description": "Workflow version identifier"
+    },
+    "id": {
+      "type": ["string", "number"],
+      "description": "Workflow ID"
+    },
+    "meta": {
+      "type": "object",
+      "description": "Metadata"
+    }
+  },
+  "additionalProperties": true
+}
