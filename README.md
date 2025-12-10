@@ -1,17 +1,17 @@
-﻿# @flowlint/core
+﻿# @replikanti/flowlint-core
 
 Core linting engine for n8n workflows. This package provides the fundamental building blocks for analyzing and validating n8n workflow files.
 
 ## Installation
 
 ```bash
-npm install @flowlint/core
+npm install @replikanti/flowlint-core
 ```
 
 ## Usage
 
 ```typescript
-import { parseN8n, runAllRules, loadConfig, defaultConfig } from '@flowlint/core';
+import { parseN8n, runAllRules, loadConfig, defaultConfig } from '@replikanti/flowlint-core';
 
 // Parse a workflow from JSON string
 const workflow = parseN8n(workflowJsonString);
@@ -72,3 +72,4 @@ This package includes 14 built-in rules:
 ## License
 
 MIT
+
