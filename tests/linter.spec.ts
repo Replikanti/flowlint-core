@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { runAllRules } from '../src/linter/analysis-engine';
-import { parseN8n } from '../src/parser';
+import { runAllRules } from '../src/rules'; 
+import { parseN8n } from '../src/parser/parser-n8n';
 import { defaultConfig } from '../src/config';
 import fs from 'fs';
 import path from 'path';
