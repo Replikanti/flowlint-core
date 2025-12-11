@@ -1,19 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-<<<<<<< HEAD
-    "config:base"
-  ],
-  "packageRules": [
-    {
-      "matchPackagePatterns": ["^@replikanti/"],
-      "groupName": "FlowLint packages",
-      "automerge": true
-    }
-  ],
-  "rangeStrategy": "bump"
-}
-=======
     "config:recommended"
   ],
   "packageRules": [
@@ -27,4 +14,3 @@
   ],
   "rangeStrategy": "bump"
 }
->>>>>>> 8b23cad167d2426b87984300e19e99935652d5ca

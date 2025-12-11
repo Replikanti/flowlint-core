@@ -1,50 +1,14 @@
 name: CI
-<<<<<<< HEAD
-
-=======
->>>>>>> 8b23cad167d2426b87984300e19e99935652d5ca
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
-<<<<<<< HEAD
-  release:
-    types: [created]
-
-=======
->>>>>>> 8b23cad167d2426b87984300e19e99935652d5ca
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-<<<<<<< HEAD
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-      - run: npm ci
-      - run: npm run test
-      - run: npm run build
-
-  publish:
-    needs: test
-    if: github.event_name == 'release'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          registry-url: 'https://registry.npmjs.org'
-      - run: npm ci
-      - run: npm run build
-      - name: Publish to NPM
-        run: npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-=======
       - uses: actions/setup-node@v6
         with:
           node-version: '20.19.6'
@@ -52,4 +16,3 @@ jobs:
       - run: npm ci
       - run: npm run test
       - run: npm run build
->>>>>>> 8b23cad167d2426b87984300e19e99935652d5ca
