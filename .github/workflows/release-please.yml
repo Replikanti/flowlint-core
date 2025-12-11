@@ -16,9 +16,9 @@ jobs:
           release-type: node
           package-name: "@replikanti/flowlint-core"
       # NPM Publish step
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
         if: ${{ steps.release.outputs.release_created }}
-      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
+      - uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # v4.0.3
         with:
           node-version: '24.11.1'
           registry-url: 'https://registry.npmjs.org'
