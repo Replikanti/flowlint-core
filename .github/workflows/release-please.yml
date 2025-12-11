@@ -21,7 +21,7 @@ jobs:
       # NPM Publish step
       - uses: actions/checkout@v4 # v4.1.7
         if: ${{ steps.release.outputs.release_created }}
-      - uses: actions/setup-node@v4 # v4.0.3
+      - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
         with:
           node-version: '24.11.1'
           registry-url: 'https://registry.npmjs.org'
