@@ -6,8 +6,10 @@
   "pinDigests": true,
   "packageRules": [
     {
-      "matchPackagePatterns": ["^@replikanti/"],
-      "automerge": true
+      "automerge": true,
+      "matchPackageNames": [
+        "/^@replikanti//"
+      ]
     }
   ]
 }
