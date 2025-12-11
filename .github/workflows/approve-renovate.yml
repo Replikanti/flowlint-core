@@ -11,13 +11,13 @@ jobs:
       pull-requests: write
     steps:
       - name: Generate Token
-        uses: actions/create-github-app-token@31c86eb3b33c271d103211ddb730277a0b23615b # v1.11.0
+        uses: actions/create-github-app-token@v1 # v1.11.0
         id: app-token
         with:
           app-id: ${{ secrets.BOT_APP_ID }}
           private-key: ${{ secrets.BOT_PRIVATE_KEY }}
 
-      - uses: hmarr/auto-approve-action@5d0f8503502941e2233288429155c2513f464a97 # v4.0.0
+      - uses: hmarr/auto-approve-action@v4 # v4.0.0
         with:
           github-token: ${{ steps.app-token.outputs.token }}
 
