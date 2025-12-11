@@ -22,8 +22,7 @@
         "test": "vitest run",
         "test:watch": "vitest",
         "lint": "eslint src/",
-        "prepublishOnly": "npm run build",
-        "release": "release-it"
+        "prepublishOnly": "npm run build"
     },
     "keywords": [
         "n8n",
