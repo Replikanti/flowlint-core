@@ -11,7 +11,7 @@ jobs:
       pull-requests: write
     steps:
       - name: Generate Token
-        uses: actions/create-github-app-token@c1a28464531d0520a779eb29e74f830869a341b5 # v1.11.0
+        uses: actions/create-github-app-token@31c86eb3b33c271d103211ddb730277a0b23615b # v1.11.0
         id: app-token
         with:
           app-id: ${{ secrets.BOT_APP_ID }}
