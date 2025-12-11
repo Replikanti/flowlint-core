@@ -52,3 +52,4 @@ export {
   isTerminalNode,
 } from './utils/utils';
 export { countFindingsBySeverity, sortFindingsBySeverity } from './utils/findings';
+export { buildCheckOutput, buildAnnotations } from './reporter/reporter';
