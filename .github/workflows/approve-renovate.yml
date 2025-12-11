@@ -10,5 +10,14 @@ jobs:
     permissions:
       pull-requests: write
     steps:
-      - uses: hmarr/auto-approve-action@f0939ea97e9205ef24d872e76833fa908a770363 # v4.0.0
+      - name: Generate Token
+        uses: actions/create-github-app-token@c1a28464531d0520a779eb29e74f830869a341b5 # v1.11.0
+        id: app-token
+        with:
+          app-id: ${{ secrets.BOT_APP_ID }}
+          private-key: ${{ secrets.BOT_PRIVATE_KEY }}
+
+      - uses: hmarr/auto-approve-action@5d0f8503502941e2233288429155c2513f464a97 # v4.0.0
+        with:
+          github-token: ${{ steps.app-token.outputs.token }}
 
