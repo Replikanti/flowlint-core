@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseN8n } from '../src/parser';
+import { parseN8n } from '../src/parser/parser-n8n';
 import fs from 'fs';
 import path from 'path';
 
@@ -9,9 +9,13 @@ describe('N8n Parser', () => {
         const graph = parseN8n(jsonContent);
 
         expect(graph).toBeDefined();
-        expect(graph.nodes.size).toBe(2);
-        expect(graph.edges.length).toBe(1);
+        expect(graph.nodes.length).toBe(2);
+        
+        const startNode = graph.nodes.find(n => n.name === 'Start');
+        expect(startNode).toBeDefined();
+        expect(startNode?.type).toBe('n8n-nodes-base.start');
     });
+
     it('should throw error on invalid JSON', () => {
         expect(() => parseN8n('{ "broken": ')).toThrow();
     });
