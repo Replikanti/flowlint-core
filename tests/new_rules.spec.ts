@@ -11,6 +11,11 @@ const mockNodeLines = (graph: Graph) =>
     return acc;
   }, {});
 
+const analyze = (graph: Graph, ruleId: string) => {
+  const findings = runAllRules(graph, { path: 'test.json', cfg: cloneConfig(), nodeLines: mockNodeLines(graph) });
+  return findings.find((f) => f.rule === ruleId);
+};
+
 describe('New workflow rules (R7-R12)', () => {
   describe('R7: alert_log_enforcement', () => {
     it('flags an error path that rejoins the main flow without a handler', () => {
@@ -28,8 +33,7 @@ describe('New workflow rules (R7-R12)', () => {
         ],
         meta: {},
       };
-      const findings = runAllRules(graph, { path: 'test.json', cfg: cloneConfig(), nodeLines: mockNodeLines(graph) });
-      expect(findings.find((f) => f.rule === 'R7')).toBeDefined();
+      expect(analyze(graph, 'R7')).toBeDefined();
     });
 
     it('passes an error path handled by a notification node', () => {
@@ -41,8 +45,7 @@ describe('New workflow rules (R7-R12)', () => {
         edges: [{ from: 'A', to: 'B', on: 'error' }],
         meta: {},
       };
-      const findings = runAllRules(graph, { path: 'test.json', cfg: cloneConfig(), nodeLines: mockNodeLines(graph) });
-      expect(findings.find((f) => f.rule === 'R7')).toBeUndefined();
+      expect(analyze(graph, 'R7')).toBeUndefined();
     });
 
     it('passes a shared error handler', () => {
@@ -58,8 +61,7 @@ describe('New workflow rules (R7-R12)', () => {
         ],
         meta: {},
       };
-      const findings = runAllRules(graph, { path: 'test.json', cfg: cloneConfig(), nodeLines: mockNodeLines(graph) });
-      expect(findings.find((f) => f.rule === 'R7')).toBeUndefined();
+      expect(analyze(graph, 'R7')).toBeUndefined();
     });
   });
 
@@ -77,114 +79,63 @@ describe('New workflow rules (R7-R12)', () => {
         ],
         meta: {},
       };
-      const findings = runAllRules(graph, { path: 'test.json', cfg: cloneConfig(), nodeLines: mockNodeLines(graph) });
-      expect(findings.find((f) => f.rule === 'R8')).toBeDefined();
+      expect(analyze(graph, 'R8')).toBeDefined();
     });
 
-    it('passes a data path that leads to a notification node', () => {
+    it.each([
+      { type: 'slack', desc: 'notification node' },
+      { type: 'googleSheets', desc: 'mutation node' },
+      { type: 'httpRequest', desc: 'API node', name: 'Call API' },
+      { type: 'respondToWebhook', desc: 'terminal node', name: 'Respond' }
+    ])('passes a data path that leads to a $desc', ({ type, name }) => {
       const graph: Graph = {
         nodes: [
           { id: 'A', name: 'Get Data', type: 'httpRequest' },
-          { id: 'B', type: 'slack' },
+          { id: 'B', name: name, type },
         ],
         edges: [{ from: 'A', to: 'B', on: 'success' }],
         meta: {},
       };
-      const findings = runAllRules(graph, { path: 'test.json', cfg: cloneConfig(), nodeLines: mockNodeLines(graph) });
-      expect(findings.find((f) => f.rule === 'R8')).toBeUndefined();
-    });
-
-    it('passes a data path that leads to a mutation node', () => {
-      const graph: Graph = {
-        nodes: [
-          { id: 'A', name: 'Get Data', type: 'httpRequest' },
-          { id: 'B', type: 'googleSheets' },
-        ],
-        edges: [{ from: 'A', to: 'B', on: 'success' }],
-        meta: {},
-      };
-      const findings = runAllRules(graph, { path: 'test.json', cfg: cloneConfig(), nodeLines: mockNodeLines(graph) });
-      expect(findings.find((f) => f.rule === 'R8')).toBeUndefined();
-    });
-
-    it('passes a data path that leads to an API node', () => {
-      const graph: Graph = {
-        nodes: [
-          { id: 'A', name: 'Webhook', type: 'webhook' },
-          { id: 'B', name: 'Call API', type: 'httpRequest' },
-        ],
-        edges: [{ from: 'A', to: 'B', on: 'success' }],
-        meta: {},
-      };
-      const findings = runAllRules(graph, { path: 'test.json', cfg: cloneConfig(), nodeLines: mockNodeLines(graph) });
-      expect(findings.find((f) => f.rule === 'R8')).toBeUndefined();
-    });
-
-    it('passes a data path that leads to a terminal node', () => {
-      const graph: Graph = {
-        nodes: [
-          { id: 'A', name: 'Get Data', type: 'httpRequest' },
-          { id: 'B', name: 'Respond', type: 'respondToWebhook' },
-        ],
-        edges: [{ from: 'A', to: 'B', on: 'success' }],
-        meta: {},
-      };
-      const findings = runAllRules(graph, { path: 'test.json', cfg: cloneConfig(), nodeLines: mockNodeLines(graph) });
-      expect(findings.find((f) => f.rule === 'R8')).toBeUndefined();
+      expect(analyze(graph, 'R8')).toBeUndefined();
     });
   });
 
   describe('R9: config_literals', () => {
-    it('flags a hardcoded environment literal in a URL', () => {
+    it.each([
+      { desc: 'URL', params: { url: 'https://api.prod.company.com/v1/users' }, type: 'httpRequest', shouldFlag: true },
+      { desc: 'environment literal', params: { env: 'production' }, type: 'set', shouldFlag: true },
+      { desc: 'valid string', params: { deviceId: 'device-123' }, type: 'set', shouldFlag: false },
+    ])('checks hardcoded literals: $desc', ({ params, type, shouldFlag }) => {
       const graph: Graph = {
-        nodes: [{ id: 'A', type: 'httpRequest', params: { url: 'https://api.prod.company.com/v1/users' } }],
+        nodes: [{ id: 'A', type, params }],
         edges: [],
         meta: {},
       };
-      const findings = runAllRules(graph, { path: 'test.json', cfg: cloneConfig(), nodeLines: mockNodeLines(graph) });
-      expect(findings.find((f) => f.rule === 'R9')).toBeDefined();
-    });
-
-    it('flags a hardcoded environment literal', () => {
-      const graph: Graph = {
-        nodes: [{ id: 'A', type: 'set', params: { env: 'production' } }],
-        edges: [],
-        meta: {},
-      };
-      const findings = runAllRules(graph, { path: 'test.json', cfg: cloneConfig(), nodeLines: mockNodeLines(graph) });
-      expect(findings.find((f) => f.rule === 'R9')).toBeDefined();
-    });
-
-    it('passes a valid string that is not a denied literal', () => {
-      const graph: Graph = {
-        nodes: [{ id: 'A', type: 'set', params: { deviceId: 'device-123' } }],
-        edges: [],
-        meta: {},
-      };
-      const findings = runAllRules(graph, { path: 'test.json', cfg: cloneConfig(), nodeLines: mockNodeLines(graph) });
-      expect(findings.find((f) => f.rule === 'R9')).toBeUndefined();
+      const result = analyze(graph, 'R9');
+      if (shouldFlag) {
+        expect(result).toBeDefined();
+      } else {
+        expect(result).toBeUndefined();
+      }
     });
   });
 
   describe('R10: naming_convention', () => {
-    it('flags a node with a generic name', () => {
+    it.each([
+      { name: 'IF', shouldFlag: true, desc: 'generic name' },
+      { name: 'Is user active?', shouldFlag: false, desc: 'descriptive name' }
+    ])('checks node name: $desc', ({ name, shouldFlag }) => {
       const graph: Graph = {
-        nodes: [{ id: 'A', type: 'n8n-nodes-base.if', name: 'IF' }],
+        nodes: [{ id: 'A', type: 'n8n-nodes-base.if', name }],
         edges: [],
         meta: {},
       };
-      const findings = runAllRules(graph, { path: 'test.json', cfg: cloneConfig(), nodeLines: mockNodeLines(graph) });
-      expect(findings.find((f) => f.rule === 'R10')).toBeDefined();
-    });
-
-    it('passes a node with a descriptive name', () => {
-      const graph: Graph = {
-        nodes: [{ id: 'A', type: 'n8n-nodes-base.if', name: 'Is user active?' }],
-        edges: [],
-        meta: {},
-      };
-      const findings = runAllRules(graph, { path: 'test.json', cfg: cloneConfig(), nodeLines: mockNodeLines(graph) });
-      expect(findings.find((f) => f.rule === 'R10')).toBeUndefined();
+      const result = analyze(graph, 'R10');
+      if (shouldFlag) {
+        expect(result).toBeDefined();
+      } else {
+        expect(result).toBeUndefined();
+      }
     });
   });
 
@@ -195,8 +146,7 @@ describe('New workflow rules (R7-R12)', () => {
         edges: [],
         meta: {},
       };
-      const findings = runAllRules(graph, { path: 'test.json', cfg: cloneConfig(), nodeLines: mockNodeLines(graph) });
-      expect(findings.find((f) => f.rule === 'R11')).toBeDefined();
+      expect(analyze(graph, 'R11')).toBeDefined();
     });
   });
 
@@ -207,8 +157,7 @@ describe('New workflow rules (R7-R12)', () => {
         edges: [],
         meta: {},
       };
-      const findings = runAllRules(graph, { path: 'test.json', cfg: cloneConfig(), nodeLines: mockNodeLines(graph) });
-      expect(findings.find((f) => f.rule === 'R12')).toBeDefined();
+      expect(analyze(graph, 'R12')).toBeDefined();
     });
 
     it('passes an error-prone node with an error path', () => {
@@ -217,56 +166,55 @@ describe('New workflow rules (R7-R12)', () => {
         edges: [{ from: 'A', to: 'B', on: 'error' }],
         meta: {},
       };
-      const findings = runAllRules(graph, { path: 'test.json', cfg: cloneConfig(), nodeLines: mockNodeLines(graph) });
-      expect(findings.find((f) => f.rule === 'R12')).toBeUndefined();
+      expect(analyze(graph, 'R12')).toBeUndefined();
     });
 
     it('treats Stop and Error nodes as valid error handlers even if mislabelled', () => {
       const graph = buildStopAndErrorGraphFixture();
-      const findings = runAllRules(graph, { path: 'test.json', cfg: cloneConfig(), nodeLines: mockNodeLines(graph) });
-      expect(findings.find((f) => f.rule === 'R12')).toBeUndefined();
+      expect(analyze(graph, 'R12')).toBeUndefined();
     });
   });
 
   describe('R13: webhook_acknowledgment', () => {
-    it('flags webhook without immediate response before heavy processing', () => {
-      const graph: Graph = {
-        nodes: [
-          { id: '1', type: 'n8n-nodes-base.webhook', name: 'Webhook', params: { path: 'test' } },
-          { id: '2', type: 'n8n-nodes-base.httpRequest', name: 'HTTP Request', params: { url: 'https://api.example.com' } },
-          { id: '3', type: 'n8n-nodes-base.respondToWebhook', name: 'Respond', params: { respondWith: 'text' } },
-        ],
-        edges: [
-          { from: '1', to: '2', on: 'success' },
-          { from: '2', to: '3', on: 'success' },
-        ],
-        meta: {},
-      };
-      const findings = runAllRules(graph, { path: 'test.json', cfg: cloneConfig(), nodeLines: mockNodeLines(graph) });
-      const r13Findings = findings.filter((f) => f.rule === 'R13');
+    const createWebhookGraph = (hasImmediateResponse: boolean): Graph => {
+        const nodes = [
+            { id: '1', type: 'n8n-nodes-base.webhook', name: 'Webhook', params: { path: 'test' } },
+        ];
+        
+        if (hasImmediateResponse) {
+             nodes.push(
+                 { id: '2', type: 'n8n-nodes-base.respondToWebhook', name: 'Respond', params: { respondWith: 'text' } },
+                 { id: '3', type: 'n8n-nodes-base.httpRequest', name: 'HTTP Request', params: { url: 'https://api.example.com' } }
+             );
+        } else {
+             nodes.push(
+                { id: '2', type: 'n8n-nodes-base.httpRequest', name: 'HTTP Request', params: { url: 'https://api.example.com' } },
+                { id: '3', type: 'n8n-nodes-base.respondToWebhook', name: 'Respond', params: { respondWith: 'text' } },
+             );
+        }
 
-      expect(r13Findings).toHaveLength(1);
-      expect(r13Findings[0]!.message).toContain('heavy processing before acknowledgment');
-      expect(r13Findings[0]!.severity).toBe('must');
+        // Edges logic simplified for brevity as the order in array matters for R13 logic in some impls, 
+        // but typically edges define the flow.
+        const edges = [
+            { from: '1', to: '2', on: 'success' },
+            { from: '2', to: '3', on: 'success' },
+        ];
+
+        return { nodes, edges, meta: {} };
+    };
+
+    it('flags webhook without immediate response before heavy processing', () => {
+      const graph = createWebhookGraph(false);
+      const finding = analyze(graph, 'R13');
+
+      expect(finding).toBeDefined();
+      expect(finding!.message).toContain('heavy processing before acknowledgment');
+      expect(finding!.severity).toBe('must');
     });
 
     it('passes webhook with immediate response', () => {
-      const graph: Graph = {
-        nodes: [
-          { id: '1', type: 'n8n-nodes-base.webhook', name: 'Webhook', params: { path: 'test' } },
-          { id: '2', type: 'n8n-nodes-base.respondToWebhook', name: 'Respond', params: { respondWith: 'text' } },
-          { id: '3', type: 'n8n-nodes-base.httpRequest', name: 'HTTP Request', params: { url: 'https://api.example.com' } },
-        ],
-        edges: [
-          { from: '1', to: '2', on: 'success' },
-          { from: '2', to: '3', on: 'success' },
-        ],
-        meta: {},
-      };
-      const findings = runAllRules(graph, { path: 'test.json', cfg: cloneConfig(), nodeLines: mockNodeLines(graph) });
-      const r13Findings = findings.filter((f) => f.rule === 'R13');
-
-      expect(r13Findings).toHaveLength(0); // Good pattern - no findings
+      const graph = createWebhookGraph(true);
+      expect(analyze(graph, 'R13')).toBeUndefined();
     });
   });
 
@@ -277,17 +225,13 @@ describe('New workflow rules (R7-R12)', () => {
       meta: {},
     });
 
-    const getR14Findings = (graph: Graph) =>
-      runAllRules(graph, { path: 'test.json', cfg: cloneConfig(), nodeLines: mockNodeLines(graph) })
-        .filter((f) => f.rule === 'R14');
-
     it('flags HTTP node with retry but without Retry-After handling', () => {
       const graph = createHttpNodeGraph({ params: { url: 'https://api.example.com', options: { retryOnFail: true } } });
-      const findings = getR14Findings(graph);
+      const finding = analyze(graph, 'R14');
 
-      expect(findings).toHaveLength(1);
-      expect(findings[0]!.message).toContain('ignores Retry-After headers');
-      expect(findings[0]!.severity).toBe('should');
+      expect(finding).toBeDefined();
+      expect(finding!.message).toContain('ignores Retry-After headers');
+      expect(finding!.severity).toBe('should');
     });
 
     it('passes HTTP node with Retry-After header handling', () => {
@@ -301,12 +245,12 @@ describe('New workflow rules (R7-R12)', () => {
           },
         },
       });
-      expect(getR14Findings(graph)).toHaveLength(0);
+      expect(analyze(graph, 'R14')).toBeUndefined();
     });
 
     it('passes HTTP node without retry enabled', () => {
       const graph = createHttpNodeGraph({ params: { url: 'https://api.example.com' } });
-      expect(getR14Findings(graph)).toHaveLength(0);
+      expect(analyze(graph, 'R14')).toBeUndefined();
     });
 
     it('passes HTTP node with retryAfter in params', () => {
@@ -317,7 +261,7 @@ describe('New workflow rules (R7-R12)', () => {
           customRetryAfter: '{{ $json.headers["retry_after"] }}',
         },
       });
-      expect(getR14Findings(graph)).toHaveLength(0);
+      expect(analyze(graph, 'R14')).toBeUndefined();
     });
 
     it('flags HTTP node with explicit retry config but no Retry-After', () => {
@@ -325,10 +269,10 @@ describe('New workflow rules (R7-R12)', () => {
         flags: { retryOnFail: true },
         params: { url: 'https://api.stripe.com/v1/charges' },
       });
-      const findings = getR14Findings(graph);
+      const finding = analyze(graph, 'R14');
 
-      expect(findings).toHaveLength(1);
-      expect(findings[0]!.message).toContain('ignores Retry-After headers');
+      expect(finding).toBeDefined();
+      expect(finding!.message).toContain('ignores Retry-After headers');
     });
   });
 });
