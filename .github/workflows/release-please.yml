@@ -55,3 +55,11 @@ jobs:
           repository: Replikanti/flowlint-examples
           event-type: flowlint-core-released
           client-payload: '{"version": "${{ needs.release-please.outputs.version }}"}'
+
+      - name: Trigger Web Roadmap Sync
+        uses: peter-evans/repository-dispatch@v3 # v3.0.0
+        with:
+          token: ${{ steps.app-token.outputs.token }}
+          repository: Replikanti/flowlint-web
+          event-type: flowlint-core-released
+          client-payload: '{"version": "${{ needs.release-please.outputs.version }}"}'
