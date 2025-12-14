@@ -1,0 +1,10 @@
+{
+  "release-search-depth": 50,
+  "commit-search-depth": 50,
+  "packages": {
+    ".": {
+      "release-type": "node",
+      "package-name": "@replikanti/flowlint-core"
+    }
+  }
+}
