@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.9.0](https://github.com/Replikanti/flowlint-core/compare/v0.8.0...v0.9.0) (2025-12-15)
+
+
+### Features
+
+* export rules metadata for automated documentation ([bcda723](https://github.com/Replikanti/flowlint-core/commit/bcda72320eea6c4087e4b5c67855f751baa25d80))
+
+
+### Bug Fixes
+
+* **ci:** add automerge workflow and trigger to core release process ([380bf28](https://github.com/Replikanti/flowlint-core/commit/380bf282f1a4b989f885a634e5e456ad6bfd8664))
+* **ci:** enable automatic release on push to main ([bee220f](https://github.com/Replikanti/flowlint-core/commit/bee220f82027ed4b9162e75876f9fb2a55fe1cdd))
+
 ## [0.8.0](https://github.com/Replikanti/flowlint-core/compare/v0.7.1...v0.8.0) (2025-12-13)
 
 
