@@ -1,6 +1,7 @@
 ﻿import type { Graph, Finding, NodeRef } from '../types';
 import type { FlowLintConfig } from '../config';
 import { createNodeRule, createHardcodedStringRule } from './rule-utils';
+import { RULES_METADATA } from './metadata';
 import {
   isApiNode,
   isMutationNode,
@@ -19,6 +20,12 @@ import {
 type RuleContext = { path: string; cfg: FlowLintConfig; nodeLines?: Record<string, number> };
 
 type RuleRunner = (graph: Graph, ctx: RuleContext) => Finding[];
+
+const getRuleMeta = (id: string) => {
+  const meta = RULES_METADATA.find((r) => r.id === id);
+  if (!meta) throw new Error(`Metadata for rule ${id} not found`);
+  return meta;
+};
 
 // --- Rule Definitions using Helpers ---
 
@@ -47,9 +54,10 @@ const r1Retry = createNodeRule('R1', 'rate_limit_retry', (node, graph, ctx) => {
     }
   }
 
+  const meta = getRuleMeta('R1');
   return {
     rule: 'R1',
-    severity: 'must',
+    severity: meta.severity,
     path: ctx.path,
     message: `Node ${node.name || node.id} is missing retry/backoff configuration`,
     raw_details: `In the node properties, enable "Retry on Fail" under Options.`,
@@ -60,9 +68,10 @@ const r1Retry = createNodeRule('R1', 'rate_limit_retry', (node, graph, ctx) => {
 
 const r2ErrorHandling = createNodeRule('R2', 'error_handling', (node, graph, ctx) => {
   if (ctx.cfg.rules.error_handling.forbid_continue_on_fail && node.flags?.continueOnFail) {
+    const meta = getRuleMeta('R2');
     return {
       rule: 'R2',
-      severity: 'must',
+      severity: meta.severity,
       path: ctx.path,
       message: `Node ${node.name || node.id} has continueOnFail enabled (disable it and route errors explicitly)`,
       nodeId: node.id,
@@ -76,7 +85,7 @@ const r2ErrorHandling = createNodeRule('R2', 'error_handling', (node, graph, ctx
 
 const r4Secrets = createHardcodedStringRule({
   ruleId: 'R4',
-  severity: 'must',
+  severity: getRuleMeta('R4').severity,
   configKey: 'secrets',
   messageFn: (node) => `Node ${node.name || node.id} contains a hardcoded secret (move it to credentials/env vars)`,
   details: 'Move API keys/tokens into Credentials or environment variables; the workflow should only reference {{$credentials.*}} expressions.',
@@ -84,7 +93,7 @@ const r4Secrets = createHardcodedStringRule({
 
 const r9ConfigLiterals = createHardcodedStringRule({
   ruleId: 'R9',
-  severity: 'should',
+  severity: getRuleMeta('R9').severity,
   configKey: 'config_literals',
   messageFn: (node, value) => `Node ${node.name || node.id} contains env-specific literal "${value.substring(0, 40)}" (move to expression/credential)`,
   details: 'Move environment-specific URLs/IDs into expressions or credentials (e.g., {{$env.API_BASE_URL}}) so the workflow is portable.',
@@ -93,9 +102,10 @@ const r9ConfigLiterals = createHardcodedStringRule({
 const r10NamingConvention = createNodeRule('R10', 'naming_convention', (node, graph, ctx) => {
   const genericNames = new Set(ctx.cfg.rules.naming_convention.generic_names ?? []);
   if (!node.name || genericNames.has(node.name.toLowerCase())) {
+    const meta = getRuleMeta('R10');
     return {
       rule: 'R10',
-      severity: 'nit',
+      severity: meta.severity,
       path: ctx.path,
       message: `Node ${node.id} uses a generic name "${node.name ?? ''}" (rename it to describe the action)`,
       nodeId: node.id,
@@ -113,9 +123,10 @@ const DEPRECATED_NODES: Record<string, string> = {
 
 const r11DeprecatedNodes = createNodeRule('R11', 'deprecated_nodes', (node, graph, ctx) => {
   if (DEPRECATED_NODES[node.type]) {
+    const meta = getRuleMeta('R11');
     return {
       rule: 'R11',
-      severity: 'should',
+      severity: meta.severity,
       path: ctx.path,
       message: `Node ${node.name || node.id} uses deprecated type ${node.type} (replace with ${DEPRECATED_NODES[node.type]})`,
       nodeId: node.id,
@@ -138,9 +149,10 @@ const r12UnhandledErrorPath = createNodeRule('R12', 'unhandled_error_path', (nod
   });
 
   if (!hasErrorPath) {
+    const meta = getRuleMeta('R12');
     return {
       rule: 'R12',
-      severity: 'must',
+      severity: meta.severity,
       path: ctx.path,
       message: `Node ${node.name || node.id} has no error branch (add a red connector to handler)`,
       nodeId: node.id,
@@ -157,6 +169,7 @@ function r13WebhookAcknowledgment(graph: Graph, ctx: RuleContext): Finding[] {
   if (!cfg?.enabled) return [];
 
   const findings: Finding[] = [];
+  const meta = getRuleMeta('R13');
 
   // Find all webhook trigger nodes (not respondToWebhook)
   const webhookNodes = graph.nodes.filter((node) =>
@@ -199,7 +212,7 @@ function r13WebhookAcknowledgment(graph: Graph, ctx: RuleContext): Finding[] {
     if (hasHeavyProcessing) {
       findings.push({
         rule: 'R13',
-        severity: 'must',
+        severity: meta.severity,
         path: ctx.path,
         message: `Webhook "${webhookNode.name || webhookNode.id}" performs heavy processing before acknowledgment (risk of timeout/duplicates)`,
         nodeId: webhookNode.id,
@@ -263,10 +276,11 @@ const r14RetryAfterCompliance = createNodeRule('R14', 'retry_after_compliance', 
     return null; // Good - respects Retry-After
   }
 
+  const meta = getRuleMeta('R14');
   // Flag as violation
   return {
     rule: 'R14',
-    severity: 'should',
+    severity: meta.severity,
     path: ctx.path,
     message: `Node ${node.name || node.id} has retry logic but ignores Retry-After headers (429/503 responses)`,
     raw_details: `Add expression to parse Retry-After header: const retryAfter = $json.headers['retry-after']; const delay = retryAfter ? (parseInt(retryAfter) || new Date(retryAfter) - Date.now()) : Math.min(1000 * Math.pow(2, $execution.retryCount), 60000); This prevents API bans and respects server rate limits.`,
@@ -289,6 +303,7 @@ function r3Idempotency(graph: Graph, ctx: RuleContext): Finding[] {
   if (!mutationNodes.length) return [];
 
   const findings: Finding[] = [];
+  const meta = getRuleMeta('R3');
 
   for (const mutationNode of mutationNodes) {
     const upstreamNodeIds = findAllUpstreamNodes(graph, mutationNode.id);
@@ -301,7 +316,7 @@ function r3Idempotency(graph: Graph, ctx: RuleContext): Finding[] {
     if (!hasGuard) {
       findings.push({
         rule: 'R3',
-        severity: 'must',
+        severity: meta.severity,
         path: ctx.path,
         message: `The mutation path ending at "${
           mutationNode.name || mutationNode.id
@@ -328,11 +343,13 @@ function r5DeadEnds(graph: Graph, ctx: RuleContext): Finding[] {
   for (const edge of graph.edges) outgoing.set(edge.from, (outgoing.get(edge.from) || 0) + 1);
 
   const findings: Finding[] = [];
+  const meta = getRuleMeta('R5');
+
   for (const node of graph.nodes) {
     if ((outgoing.get(node.id) || 0) === 0 && !isTerminalNode(node.type, node.name)) {
       findings.push({
         rule: 'R5',
-        severity: 'nit',
+        severity: meta.severity,
         path: ctx.path,
         message: `Node ${node.name || node.id} has no outgoing connections (either wire it up or remove it)`,
         nodeId: node.id,
@@ -348,6 +365,7 @@ function r6LongRunning(graph: Graph, ctx: RuleContext): Finding[] {
   const cfg = ctx.cfg.rules.long_running;
   if (!cfg?.enabled) return [];
   const findings: Finding[] = [];
+  const meta = getRuleMeta('R6');
   const loopNodes = graph.nodes.filter((node) => /loop|batch|while|repeat/i.test(node.type));
 
   for (const node of loopNodes) {
@@ -361,7 +379,7 @@ function r6LongRunning(graph: Graph, ctx: RuleContext): Finding[] {
     if (!iterations || (cfg.max_iterations && iterations > cfg.max_iterations)) {
       findings.push({
         rule: 'R6',
-        severity: 'should',
+        severity: meta.severity,
         path: ctx.path,
         message: `Node ${node.name || node.id} allows ${
           iterations ?? 'unbounded'
@@ -377,7 +395,7 @@ function r6LongRunning(graph: Graph, ctx: RuleContext): Finding[] {
       if (timeout && timeout > cfg.timeout_ms) {
           findings.push({
             rule: 'R6',
-            severity: 'should',
+            severity: meta.severity,
             path: ctx.path,
             message: `Node ${node.name || node.id} uses timeout ${timeout}ms (limit ${
               cfg.timeout_ms
@@ -398,6 +416,7 @@ function r7AlertLogEnforcement(graph: Graph, ctx: RuleContext): Finding[] {
   if (!cfg?.enabled) return [];
 
   const findings: Finding[] = [];
+  const meta = getRuleMeta('R7');
   const errorEdges = graph.edges.filter((edge) => edge.on === 'error');
 
   for (const edge of errorEdges) {
@@ -433,7 +452,7 @@ function r7AlertLogEnforcement(graph: Graph, ctx: RuleContext): Finding[] {
     if (!isHandled) {
       findings.push({
         rule: 'R7',
-        severity: 'should',
+        severity: meta.severity,
         path: ctx.path,
         message: `Error path from node ${
           fromNode.name || fromNode.id
@@ -452,6 +471,7 @@ function r8UnusedData(graph: Graph, ctx: RuleContext): Finding[] {
   if (!cfg?.enabled) return [];
 
   const findings: Finding[] = [];
+  const meta = getRuleMeta('R8');
   for (const node of graph.nodes) {
     // If a node has no successors, R5 handles it. If it's a terminal node, its "use" is to end the flow.
     if (isTerminalNode(node.type, node.name) || !graph.edges.some((e) => e.from === node.id)) {
@@ -469,7 +489,7 @@ function r8UnusedData(graph: Graph, ctx: RuleContext): Finding[] {
     if (!leadsToConsumer) {
       findings.push({
         rule: 'R8',
-        severity: 'nit',
+        severity: meta.severity,
         path: ctx.path,
         message: `Node "${node.name || node.id}" produces data that never reaches any consumer`,
         nodeId: node.id,
