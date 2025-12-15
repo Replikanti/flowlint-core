@@ -12,7 +12,7 @@
 export { parseN8n } from './parser/parser-n8n';
 
 // Rules
-export { runAllRules } from './rules';
+export { runAllRules, RULES_METADATA, type RuleMetadata } from './rules/exports';
 
 // Schemas
 export { validateN8nWorkflow, ValidationError } from './schemas';
