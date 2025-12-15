@@ -1,0 +1,37 @@
+name: Automerge Release PR
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  repository_dispatch:
+    types: [automerge-release]
+
+jobs:
+  automerge:
+    runs-on: ubuntu-latest
+    if: startsWith(github.head_ref, 'release-please--') || github.event_name == 'repository_dispatch'
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Resolve PR URL
+        id: pr
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            echo "pr_url=${{ github.event.pull_request.html_url }}" >> $GITHUB_OUTPUT
+          else
+            PR_URL=$(gh pr list --state open --label "autorelease: pending" --json url --jq ".[0].url")
+            echo "pr_url=$PR_URL" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Approve and Merge
+        if: ${{ steps.pr.outputs.pr_url }}
+        env:
+          GH_TOKEN: ${{ secrets.AUTO_APPROVE_PAT }}
+          PR_URL: ${{ steps.pr.outputs.pr_url }}
+        run: |
+          gh pr review "$PR_URL" --approve
+          gh pr merge "$PR_URL" --auto --merge
