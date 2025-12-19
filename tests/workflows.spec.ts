@@ -5,19 +5,13 @@ import { parseN8n } from '../src/parser/parser-n8n';
 // import { pickTargets } from '../src/sniffer'; // Removing missing import
 import { defaultConfig } from '../src/config/default-config';
 import type { Graph, PRFile } from '../src/types';
+import { createSimpleGraph, analyzeGraph, cloneConfig, mockNodeLines } from './helpers/graph-utils';
 
 import {
   buildStopAndErrorWorkflowFixture,
   buildErrorWorkflowFixture,
   stopAndErrorNodeIds
 } from './helpers/stop-and-error-fixture';
-
-const cloneConfig = () => structuredClone(defaultConfig);
-const mockNodeLines = (graph: Graph) =>
-  graph.nodes.reduce<Record<string, number>>((acc, node, idx) => {
-    acc[node.id] = idx + 1;
-    return acc;
-  }, {});
 
 const analyzeRule = (workflow: any, ruleId: string) => {
   const graph = parseN8n(JSON.stringify(workflow));
@@ -28,12 +22,6 @@ const analyzeRule = (workflow: any, ruleId: string) => {
   });
   return findings.find((f) => f.rule === ruleId);
 };
-
-const analyzeGraph = (graph: Graph, ruleId: string) => {
-    const findings = runAllRules(graph, { path: 'test.json', cfg: cloneConfig(), nodeLines: mockNodeLines(graph) });
-    return findings.find((f) => f.rule === ruleId);
-}
-
 
 describe('Workflow rules acceptance scenarios', () => {
   afterEach(() => {
@@ -46,15 +34,12 @@ describe('Workflow rules acceptance scenarios', () => {
       { desc: 'passes API nodes with retryOnFail enabled', retryOnFail: true, shouldFlag: false },
       { desc: 'passes API nodes with retryOnFail set via an expression', retryOnFail: '{{ $env.ENABLE_RETRY }}', shouldFlag: false },
     ])('$desc', ({ retryOnFail, shouldFlag }) => {
-      const graph: Graph = {
-        nodes: [{ id: '1', type: 'httpRequest', name: 'Call API', params: { options: { retryOnFail } } }],
-        edges: [],
-        meta: {},
-      };
+      const graph = createSimpleGraph([{ id: '1', type: 'httpRequest', name: 'Call API', params: { options: { retryOnFail } } }]);
       const finding = analyzeGraph(graph, 'R1');
       if (shouldFlag) expect(finding).toBeDefined();
       else expect(finding).toBeUndefined();
     });
+
 
     it('passes API nodes when retryOnFail is set at the node root level (n8n export)', () => {
       const workflow = {
@@ -75,11 +60,7 @@ describe('Workflow rules acceptance scenarios', () => {
 
   describe('R2: Error Handling', () => {
     it('fails the check when continueOnFail is set', () => {
-      const graph: Graph = {
-        nodes: [{ id: '42', type: 'set', name: 'Unreliable', flags: { continueOnFail: true } }],
-        edges: [],
-        meta: {},
-      };
+      const graph = createSimpleGraph([{ id: '42', type: 'set', name: 'Unreliable', flags: { continueOnFail: true } }]);
       const findings = runAllRules(graph, { path: 'test.json', cfg: cloneConfig(), nodeLines: mockNodeLines(graph) });
       const { conclusion } = buildCheckOutput({ findings, cfg: cloneConfig() });
       expect(conclusion).toBe('failure');
@@ -97,12 +78,13 @@ describe('Workflow rules acceptance scenarios', () => {
        for (let i = 0; i < nodes.length - 1; i++) {
            edges.push({ from: nodes[i].id, to: nodes[i+1].id, on: 'success' });
        }
-       const graph: Graph = { nodes, edges, meta: {} };
+       const graph = createSimpleGraph(nodes, edges);
        const finding = analyzeGraph(graph, 'R3');
        if (shouldFlag) expect(finding).toBeDefined();
        else expect(finding).toBeUndefined();
     });
   });
+
 
   it('parses nested connection arrays without throwing', () => {
     const workflow = {
@@ -163,11 +145,7 @@ describe('Workflow rules acceptance scenarios', () => {
         { desc: 'detects literal secrets', val: 'Bearer SHOULD-NOT-BE-HERE', shouldFlag: true },
         { desc: 'ignores secrets inside expressions', val: '{{ $credentials.apiKey }}', shouldFlag: false }
     ])('$desc', ({ val, shouldFlag }) => {
-         const graph: Graph = {
-            nodes: [{ id: '1', type: 'set', params: { token: val } }],
-            edges: [],
-            meta: {},
-         };
+         const graph = createSimpleGraph([{ id: '1', type: 'set', params: { token: val } }]);
          const finding = analyzeGraph(graph, 'R4');
          if (shouldFlag) expect(finding).toBeDefined();
          else expect(finding).toBeUndefined();
@@ -206,31 +184,26 @@ describe('Workflow rules acceptance scenarios', () => {
   */
 
   it('warns when nodes end without outgoing edges (R5)', () => {
-    const graph: Graph = {
-      nodes: [
+    const graph = createSimpleGraph(
+      [
         { id: 'start', type: 'webhook', name: 'Webhook', params: {} },
         { id: 'orphan', type: 'set', name: 'Never used', params: {} },
       ],
-      edges: [{ from: 'start', to: 'start', on: 'success' }],
-      meta: {},
-    };
+      [{ from: 'start', to: 'start', on: 'success' }],
+    );
     expect(analyzeGraph(graph, 'R5')).toBeTruthy();
   });
 
   it('warns when loop nodes exceed configured limits (R6)', () => {
     const cfg = cloneConfig();
-    const graph: Graph = {
-      nodes: [
-        {
-          id: 'loop',
-          type: 'loopOverItems',
-          name: 'Batch loop',
-          params: { maxIterations: cfg.rules.long_running.max_iterations * 5, timeout: cfg.rules.long_running.timeout_ms * 2 },
-        },
-      ],
-      edges: [],
-      meta: {},
-    };
+    const graph = createSimpleGraph([
+      {
+        id: 'loop',
+        type: 'loopOverItems',
+        name: 'Batch loop',
+        params: { maxIterations: cfg.rules.long_running.max_iterations * 5, timeout: cfg.rules.long_running.timeout_ms * 2 },
+      },
+    ]);
 
     const findings = runAllRules(graph, {
       path: 'workflows/sample.json',
@@ -239,4 +212,5 @@ describe('Workflow rules acceptance scenarios', () => {
     });
     expect(findings.filter((f) => f.rule === 'R6').length).toBeGreaterThanOrEqual(1);
   });
+
 });
