@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.9.1](https://github.com/Replikanti/flowlint-core/compare/v0.9.0...v0.9.1) (2025-12-19)
+
+
+### Bug Fixes
+
+* enable manual CI trigger and fix release PR execution ([0606cea](https://github.com/Replikanti/flowlint-core/commit/0606cea436fc164d200b39a4f81a2973d7054f0e))
+* enable manual CI trigger and fix release-please token to trigger CI ([5ffb6de](https://github.com/Replikanti/flowlint-core/commit/5ffb6de9964eca7bad1371ef923fb83de11f9cb5))
+* further reduce duplication risk by breaking strings and improving sonar exclusions ([8add516](https://github.com/Replikanti/flowlint-core/commit/8add5164579e1b832410c03db57daebba81eccdf))
+* move rule metadata to JSON to eliminate code duplication ([3804171](https://github.com/Replikanti/flowlint-core/commit/380417155db2b4d83461273d33f32640dcbdab04))
+* reduce code duplication in metadata and tests to satisfy SonarQube ([ff7bb11](https://github.com/Replikanti/flowlint-core/commit/ff7bb114ae5b40bfd59781e8b83bf83bab0737ae))
+* reduce code duplication in metadata and tests to satisfy SonarQube ([39e04fc](https://github.com/Replikanti/flowlint-core/commit/39e04fcacbb18502acbe6f35a039f17491620284))
+* rename CI job to 'CI' and revert metadata to TS to fix build ([413d16c](https://github.com/Replikanti/flowlint-core/commit/413d16cae60af0e3027681a24cf22174468687da))
+* rename CI job to 'CI' and revert metadata to TS to fix build ([9141a0f](https://github.com/Replikanti/flowlint-core/commit/9141a0f5b711dff12a0526ceab0d4c326c4f6155))
+
 ## [0.9.0](https://github.com/Replikanti/flowlint-core/compare/v0.8.0...v0.9.0) (2025-12-15)
 
 
