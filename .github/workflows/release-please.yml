@@ -19,6 +19,7 @@ jobs:
         with:
           release-type: node
           package-name: "@replikanti/flowlint-core"
+          token: ${{ secrets.AUTO_APPROVE_PAT }}
       # NPM Publish step
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
         if: ${{ steps.release.outputs.release_created }}
