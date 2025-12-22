@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.9.3](https://github.com/Replikanti/flowlint-core/compare/v0.9.2...v0.9.3) (2025-12-22)
+
+
+### Bug Fixes
+
+* **ci:** move permissions to job level in release workflow ([9d08eec](https://github.com/Replikanti/flowlint-core/commit/9d08eec02e8a430f3bb795d0d8c11cdaea68bc30))
+* **ci:** split approve and merge steps to fix token permissions ([34f8b8e](https://github.com/Replikanti/flowlint-core/commit/34f8b8e35991911aa141575e87c97f6cb4e29dd8))
+* **core:** comprehensive cleanup and security fixes ([fa2edc5](https://github.com/Replikanti/flowlint-core/commit/fa2edc574ad7f11d4c2bfa5ff3a67ce2f3c44886))
+
 ## [0.9.2](https://github.com/Replikanti/flowlint-core/compare/v0.9.1...v0.9.2) (2025-12-22)
 
 
