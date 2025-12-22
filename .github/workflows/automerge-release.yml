@@ -27,11 +27,18 @@ jobs:
             echo "pr_url=$PR_URL" >> $GITHUB_OUTPUT
           fi
 
-      - name: Approve and Merge
+      - name: Approve PR
+        if: ${{ steps.pr.outputs.pr_url }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_URL: ${{ steps.pr.outputs.pr_url }}
+        run: |
+          gh pr review "$PR_URL" --approve
+
+      - name: Enable Auto-Merge
         if: ${{ steps.pr.outputs.pr_url }}
         env:
           GH_TOKEN: ${{ secrets.AUTO_APPROVE_PAT }}
           PR_URL: ${{ steps.pr.outputs.pr_url }}
         run: |
-          gh pr review "$PR_URL" --approve
           gh pr merge "$PR_URL" --auto --merge
