@@ -2,9 +2,6 @@ import { describe, it, expect, vi, afterEach } from 'vitest';
 import { runAllRules } from '../src/rules';
 import { buildCheckOutput } from '../src/reporter/reporter';
 import { parseN8n } from '../src/parser/parser-n8n';
-// import { pickTargets } from '../src/sniffer'; // Removing missing import
-import { defaultConfig } from '../src/config/default-config';
-import type { Graph, PRFile } from '../src/types';
 import { createSimpleGraph, analyzeGraph, cloneConfig, mockNodeLines } from './helpers/graph-utils';
 
 import {
@@ -73,7 +70,6 @@ describe('Workflow rules acceptance scenarios', () => {
       { desc: 'passes when a guard key exists on a node far upstream', nodes: [{ id: 'start', type: 'webhook', params: { body: { eventId: 'evt_123' } } }, { id: 'transform', type: 'set' }, { id: 'logic', type: 'if' }, { id: 'writer', type: 'googleSheets' }], shouldFlag: false },
       { desc: 'passes when a guard value exists in an expression upstream', nodes: [{ id: 'start', type: 'webhook' }, { id: 'pre', type: 'set', params: { someKey: '{{ $json.body.messageId }}' } }, { id: 'writer', type: 'googleSheets' }], shouldFlag: false }
     ])('$desc', ({ nodes, shouldFlag }) => {
-       // Simplified edge construction: assume linear flow for these tests
        const edges = [];
        for (let i = 0; i < nodes.length - 1; i++) {
            edges.push({ from: nodes[i].id, to: nodes[i+1].id, on: 'success' });
@@ -151,37 +147,6 @@ describe('Workflow rules acceptance scenarios', () => {
          else expect(finding).toBeUndefined();
     });
   });
-
-  /*
-  // PickTargets is not available in core
-  it('ignores files that match the default exclude globs', () => {
-    const files: PRFile[] = [
-      { filename: 'workflows/sample.json', status: 'added' },
-      { filename: 'samples/demo.json', status: 'added' },
-      { filename: 'package.json', status: 'added' },
-      { filename: 'workflow.n8n.json', status: 'added' },
-    ];
-
-    if (typeof pickTargets === 'function') {
-        const targets = pickTargets(files, defaultConfig.files);
-        expect(targets.map((file) => file.filename)).toEqual(['workflows/sample.json', 'workflow.n8n.json']);
-    }
-  });
-
-  it('ignores FlowLint config and GitHub workflow files', () => {
-    const files: PRFile[] = [
-      { filename: '.flowlint.yml', status: 'modified' },
-      { filename: '.github/workflows/ci.yml', status: 'added' },
-      { filename: 'workflows/my-workflow.n8n.json', status: 'added' },
-      { filename: 'vite.config.ts', status: 'modified' },
-    ];
-
-    if (typeof pickTargets === 'function') {
-        const targets = pickTargets(files, defaultConfig.files);
-        expect(targets.map((file) => file.filename)).toEqual(['workflows/my-workflow.n8n.json']);
-    }
-  });
-  */
 
   it('warns when nodes end without outgoing edges (R5)', () => {
     const graph = createSimpleGraph(

@@ -62,47 +62,47 @@ export function createMockOctokit(
         error.response = { headers: { 'x-ratelimit-remaining': '0' } };
         throw error;
       }
-      if (endpoint === 'GET /repos/{owner}/{repo}/commits/{ref}/check-runs') {
-        return { 
-          data: { 
-            check_runs: config.existingFlowLintChecks?.map(check => ({
-              ...check,
-              name: process.env.CHECK_NAME || 'FlowLint',
-              head_sha: options.ref
-            })) || []
-          } 
-        };
-      }
-      if (endpoint === 'POST /repos/{owner}/{repo}/check-runs') {
-        if (config.shouldFailCheckRunCreation) throw new Error('Failed to create check run');
-        const checkRun = { id: config.checkRunId, ...options };
-        createdCheckRuns.push(checkRun);
-        return { data: checkRun };
-      }
-      if (endpoint === 'PATCH /repos/{owner}/{repo}/check-runs/{check_run_id}') {
-        checkRunUpdates.push({ check_run_id: options.check_run_id, ...options });
-        return { data: { id: options.check_run_id } };
-      }
-      if (endpoint === 'GET /repos/{owner}/{repo}/pulls/{pull_number}/files') {
-        if (config.shouldFailFilesFetch) throw new Error('Failed to fetch PR files');
-        return config.prFiles;
-      }
-      if (endpoint === 'GET /repos/{owner}/{repo}/git/blobs/{file_sha}') {
-        const content = config.fileContents!.get(options.file_sha);
-        if (!content) {
-          const error: any = new Error('Not Found');
-          error.status = 404;
-          throw error;
-        }
-        return { data: { content: Buffer.from(content).toString('base64') } };
-      }
-      if (endpoint === 'GET /repos/{owner}/{repo}/contents/{path}' && options.path === '.flowlint.yml') {
-        if (!config.configContent) {
-          const error: any = new Error('Not Found');
-          error.status = 404;
-          throw error;
-        }
-        return { data: { content: Buffer.from(config.configContent).toString('base64') } };
+
+      switch (endpoint) {
+        case 'GET /repos/{owner}/{repo}/commits/{ref}/check-runs':
+          return { 
+            data: { 
+              check_runs: config.existingFlowLintChecks?.map(check => ({
+                ...check,
+                name: process.env.CHECK_NAME || 'FlowLint',
+                head_sha: options.ref
+              })) || []
+            } 
+          };
+        case 'POST /repos/{owner}/{repo}/check-runs':
+          if (config.shouldFailCheckRunCreation) throw new Error('Failed to create check run');
+          const checkRun = { id: config.checkRunId, ...options };
+          createdCheckRuns.push(checkRun);
+          return { data: checkRun };
+        case 'PATCH /repos/{owner}/{repo}/check-runs/{check_run_id}':
+          checkRunUpdates.push({ check_run_id: options.check_run_id, ...options });
+          return { data: { id: options.check_run_id } };
+        case 'GET /repos/{owner}/{repo}/pulls/{pull_number}/files':
+          if (config.shouldFailFilesFetch) throw new Error('Failed to fetch PR files');
+          return config.prFiles;
+        case 'GET /repos/{owner}/{repo}/git/blobs/{file_sha}':
+          const content = config.fileContents!.get(options.file_sha);
+          if (!content) {
+            const error: any = new Error('Not Found');
+            error.status = 404;
+            throw error;
+          }
+          return { data: { content: Buffer.from(content).toString('base64') } };
+        case 'GET /repos/{owner}/{repo}/contents/{path}':
+          if (options.path === '.flowlint.yml') {
+            if (!config.configContent) {
+              const error: any = new Error('Not Found');
+              error.status = 404;
+              throw error;
+            }
+            return { data: { content: Buffer.from(config.configContent).toString('base64') } };
+          }
+          break;
       }
       throw new Error(`Unmocked endpoint: ${endpoint}`);
     };
