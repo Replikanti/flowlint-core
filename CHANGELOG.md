@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.2](https://github.com/Replikanti/flowlint-core/compare/v0.9.1...v0.9.2) (2025-12-22)
+
+
+### Bug Fixes
+
+* **ci:** split approve and merge steps to fix token permissions ([34f8b8e](https://github.com/Replikanti/flowlint-core/commit/34f8b8e35991911aa141575e87c97f6cb4e29dd8))
+
 ## [0.9.1](https://github.com/Replikanti/flowlint-core/compare/v0.9.0...v0.9.1) (2025-12-19)
 
 
