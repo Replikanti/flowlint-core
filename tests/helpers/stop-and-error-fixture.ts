@@ -49,11 +49,11 @@ export const stopAndErrorNodeIds = Object.freeze({
 export type StopAndErrorWorkflow = typeof STOP_AND_ERROR_WORKFLOW;
 
 export function buildStopAndErrorWorkflowFixture(): StopAndErrorWorkflow {
-  return JSON.parse(JSON.stringify(STOP_AND_ERROR_WORKFLOW)) as StopAndErrorWorkflow;
+  return structuredClone(STOP_AND_ERROR_WORKFLOW) as StopAndErrorWorkflow;
 }
 
 export function buildStopAndErrorGraphFixture(): Graph {
-  return JSON.parse(JSON.stringify(STOP_AND_ERROR_GRAPH)) as Graph;
+  return structuredClone(STOP_AND_ERROR_GRAPH) as Graph;
 }
 
 export function buildErrorWorkflowFixture(errorHandlerType: string, errorHandlerName: string, errorHandlerParams: Record<string, any> = {}) {

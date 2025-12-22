@@ -11,6 +11,36 @@ export const metadata: RuleMetadata = {
   details: 'For example, a failed payment processing branch should trigger an alert for monitoring.',
 };
 
+function isPathHandled(graph: Graph, startNodeId: string): boolean {
+  const queue: string[] = [startNodeId];
+  const visited = new Set<string>([startNodeId]);
+
+  let head = 0;
+  while (head < queue.length) {
+    const currentId = queue[head++]!;
+    const currentNode = graph.nodes.find((n) => n.id === currentId);
+
+    if (!currentNode) continue;
+
+    if (isNotificationNode(currentNode.type) || isErrorHandlerNode(currentNode.type, currentNode.name)) {
+      return true;
+    }
+
+    if (isRejoinNode(graph, currentId)) {
+      continue;
+    }
+
+    const outgoing = graph.edges.filter((e) => e.from === currentId);
+    for (const outEdge of outgoing) {
+      if (!visited.has(outEdge.to)) {
+        visited.add(outEdge.to);
+        queue.push(outEdge.to);
+      }
+    }
+  }
+  return false;
+}
+
 export function r7AlertLogEnforcement(graph: Graph, ctx: RuleContext): Finding[] {
   const cfg = ctx.cfg.rules.alert_log_enforcement;
   if (!cfg?.enabled) return [];
@@ -20,35 +50,7 @@ export function r7AlertLogEnforcement(graph: Graph, ctx: RuleContext): Finding[]
 
   for (const edge of errorEdges) {
     const fromNode = graph.nodes.find((n) => n.id === edge.from)!;
-    let isHandled = false;
-    const queue: string[] = [edge.to];
-    const visited = new Set<string>([edge.to]);
-
-    let head = 0;
-    while (head < queue.length) {
-      const currentId = queue[head++]!;
-      const currentNode = graph.nodes.find((n) => n.id === currentId)!;
-
-      if (isNotificationNode(currentNode.type) || isErrorHandlerNode(currentNode.type, currentNode.name)) {
-        isHandled = true;
-        break; // Found a handler, stop searching this path
-      }
-
-      if (isRejoinNode(graph, currentId)) {
-        continue; // It's a rejoin point, but not a handler, so stop traversing this path
-      }
-
-      // Add successors to queue
-      const outgoing = graph.edges.filter((e) => e.from === currentId);
-      for (const outEdge of outgoing) {
-        if (!visited.has(outEdge.to)) {
-          visited.add(outEdge.to);
-          queue.push(outEdge.to);
-        }
-      }
-    }
-
-    if (!isHandled) {
+    if (!isPathHandled(graph, edge.to)) {
       findings.push({
         rule: metadata.id,
         severity: metadata.severity,

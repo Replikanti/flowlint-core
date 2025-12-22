@@ -5,7 +5,7 @@ on:
 
 jobs:
   approve:
-    if: github.actor == 'renovate[bot]'
+    if: github.event.pull_request.user.login == 'renovate[bot]'
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write

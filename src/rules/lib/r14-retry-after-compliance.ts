@@ -14,7 +14,7 @@ export const r14RetryAfterCompliance = createNodeRule(metadata.id, metadata.name
   // Only check HTTP request nodes
   if (!isApiNode(node.type)) return null;
 
-  const params = (node.params ?? {}) as Record<string, unknown>;
+  const params = (node.params ?? {});
   const options = ((params as any).options ?? {}) as Record<string, unknown>;
 
   // Check if retry is enabled
@@ -46,7 +46,7 @@ export const r14RetryAfterCompliance = createNodeRule(metadata.id, metadata.name
     if (typeof waitBetweenTries === 'number') return null;
     if (
       typeof waitBetweenTries === 'string' &&
-      !isNaN(Number(waitBetweenTries)) &&
+      !Number.isNaN(Number(waitBetweenTries)) &&
       !waitBetweenTries.includes('{{')
     ) {
       return null;

@@ -184,7 +184,7 @@ export async function runE2ETest(options: E2ETestOptions): Promise<void> {
   
   if (targets.length === 0) {
     // Simulate worker logic for no target files
-    const result = reporterModule.buildCheckOutput({ 
+    reporterModule.buildCheckOutput({ 
       findings: [], 
       cfg,
       conclusionOverride: 'neutral'
@@ -196,9 +196,9 @@ export async function runE2ETest(options: E2ETestOptions): Promise<void> {
     };
   } else {
     // Normal case: use findings to determine conclusion
-    const result = reporterModule.buildCheckOutput({ findings: allFindings, cfg });
-    conclusion = result.conclusion;
-    output = result.output;
+    const res = reporterModule.buildCheckOutput({ findings: allFindings, cfg });
+    conclusion = res.conclusion;
+    output = res.output;
   }
 
   await gh.request('PATCH /repos/{owner}/{repo}/check-runs/{check_run_id}', {

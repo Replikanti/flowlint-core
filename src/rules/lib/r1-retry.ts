@@ -13,7 +13,7 @@ export const metadata: RuleMetadata = {
 export const r1Retry = createNodeRule(metadata.id, metadata.name, (node, graph, ctx) => {
   if (!isApiNode(node.type)) return null;
 
-  const params = (node.params ?? {}) as Record<string, unknown>;
+  const params = (node.params ?? {});
   const options = ((params as any).options ?? {}) as Record<string, unknown>;
 
   const retryCandidates: unknown[] = [
