@@ -23,80 +23,68 @@ describe('Graph Utilities', () => {
     },
   });
 
-  describe('findAllDownstreamNodes', () => {
-    it('should find all downstream nodes in a linear chain', () => {
-      const graph = createGraph([
-        ['A', 'B'],
-        ['B', 'C'],
-        ['C', 'D'],
-      ]);
-      const downstream = findAllDownstreamNodes(graph, 'A');
-      expect(downstream).toEqual(new Set(['A', 'B', 'C', 'D']));
+  describe('Graph Traversal', () => {
+    const linearEdges: [string, string, string?][] = [['A', 'B'], ['B', 'C'], ['C', 'D']];
+    const cycleEdges: [string, string, string?][] = [['A', 'B'], ['B', 'C'], ['C', 'A']];
+
+    it.each([
+      {
+        name: 'linear chain',
+        edges: linearEdges,
+        start: 'A',
+        expected: ['A', 'B', 'C', 'D'],
+      },
+      {
+        name: 'branching',
+        edges: [['A', 'B'], ['A', 'C'], ['B', 'D'], ['C', 'E']] as [string, string, string?][],
+        start: 'A',
+        expected: ['A', 'B', 'C', 'D', 'E'],
+      },
+      {
+        name: 'cycles',
+        edges: cycleEdges,
+        start: 'A',
+        expected: ['A', 'B', 'C'],
+      },
+      {
+        name: 'empty edges',
+        edges: [] as [string, string, string?][],
+        start: 'A',
+        expected: ['A'],
+      },
+    ])('findAllDownstreamNodes: $name', ({ edges, start, expected }) => {
+      const graph = createGraph(edges);
+      expect(findAllDownstreamNodes(graph, start)).toEqual(new Set(expected));
     });
 
-    it('should handle branching', () => {
-      const graph = createGraph([
-        ['A', 'B'],
-        ['A', 'C'],
-        ['B', 'D'],
-        ['C', 'E'],
-      ]);
-      const downstream = findAllDownstreamNodes(graph, 'A');
-      expect(downstream).toEqual(new Set(['A', 'B', 'C', 'D', 'E']));
-    });
-
-    it('should handle cycles', () => {
-      const graph = createGraph([
-        ['A', 'B'],
-        ['B', 'C'],
-        ['C', 'A'],
-      ]);
-      const downstream = findAllDownstreamNodes(graph, 'A');
-      expect(downstream).toEqual(new Set(['A', 'B', 'C']));
-    });
-
-    it('should return only the start node if no outgoing edges', () => {
-        const graph = createGraph([]);
-        const downstream = findAllDownstreamNodes(graph, 'A');
-        expect(downstream).toEqual(new Set(['A']));
-    });
-  });
-
-  describe('findAllUpstreamNodes', () => {
-    it('should find all upstream nodes in a linear chain', () => {
-      const graph = createGraph([
-        ['A', 'B'],
-        ['B', 'C'],
-        ['C', 'D'],
-      ]);
-      const upstream = findAllUpstreamNodes(graph, 'D');
-      expect(upstream).toEqual(new Set(['D', 'C', 'B', 'A']));
-    });
-
-    it('should handle converging branches', () => {
-      const graph = createGraph([
-        ['A', 'C'],
-        ['B', 'C'],
-        ['C', 'D'],
-      ]);
-      const upstream = findAllUpstreamNodes(graph, 'D');
-      expect(upstream).toEqual(new Set(['D', 'C', 'A', 'B']));
-    });
-
-    it('should handle cycles', () => {
-      const graph = createGraph([
-        ['A', 'B'],
-        ['B', 'C'],
-        ['C', 'A'],
-      ]);
-      const upstream = findAllUpstreamNodes(graph, 'A');
-      expect(upstream).toEqual(new Set(['A', 'C', 'B']));
-    });
-
-    it('should return only the start node if no incoming edges', () => {
-        const graph = createGraph([]);
-        const upstream = findAllUpstreamNodes(graph, 'A');
-        expect(upstream).toEqual(new Set(['A']));
+    it.each([
+      {
+        name: 'linear chain',
+        edges: linearEdges,
+        start: 'D',
+        expected: ['D', 'C', 'B', 'A'],
+      },
+      {
+        name: 'converging branches',
+        edges: [['A', 'C'], ['B', 'C'], ['C', 'D']] as [string, string, string?][],
+        start: 'D',
+        expected: ['D', 'C', 'A', 'B'],
+      },
+      {
+        name: 'cycles',
+        edges: cycleEdges,
+        start: 'A',
+        expected: ['A', 'C', 'B'],
+      },
+      {
+        name: 'empty edges',
+        edges: [] as [string, string, string?][],
+        start: 'A',
+        expected: ['A'],
+      },
+    ])('findAllUpstreamNodes: $name', ({ edges, start, expected }) => {
+      const graph = createGraph(edges);
+      expect(findAllUpstreamNodes(graph, start)).toEqual(new Set(expected));
     });
   });
 
@@ -114,25 +102,28 @@ describe('Graph Utilities', () => {
   });
 
   describe('isRejoinNode', () => {
-    it('should return true for a node with both error and success inputs', () => {
-      const graph = createGraph([
-        ['A', 'C', 'main'],
-        ['B', 'C', 'error'],
-      ]);
-      expect(isRejoinNode(graph, 'C')).toBe(true);
-    });
-
-    it('should return false for single input', () => {
-      const graph = createGraph([['A', 'B']]);
-      expect(isRejoinNode(graph, 'B')).toBe(false);
-    });
-
-    it('should return false for multiple success inputs only', () => {
-      const graph = createGraph([
-        ['A', 'C', 'main'],
-        ['B', 'C', 'main'],
-      ]);
-      expect(isRejoinNode(graph, 'C')).toBe(false);
+    it.each([
+      {
+        name: 'both error and success inputs',
+        edges: [['A', 'C', 'main'], ['B', 'C', 'error']] as [string, string, string?][],
+        target: 'C',
+        expected: true,
+      },
+      {
+        name: 'single input',
+        edges: [['A', 'B']] as [string, string, string?][],
+        target: 'B',
+        expected: false,
+      },
+      {
+        name: 'multiple success inputs only',
+        edges: [['A', 'C', 'main'], ['B', 'C', 'main']] as [string, string, string?][],
+        target: 'C',
+        expected: false,
+      },
+    ])('should return $expected for $name', ({ edges, target, expected }) => {
+      const graph = createGraph(edges);
+      expect(isRejoinNode(graph, target)).toBe(expected);
     });
   });
 
