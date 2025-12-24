@@ -21,6 +21,7 @@
         "build": "tsup src/index.ts --format cjs,esm --dts",
         "test": "vitest run",
         "test:watch": "vitest",
+        "test:coverage": "vitest run --coverage",
         "lint": "eslint src/",
         "prepublishOnly": "npm run build"
     },
@@ -51,6 +52,7 @@
     "devDependencies": {
         "@types/micromatch": "4.0.10",
         "@types/node": "24.10.4",
+        "@vitest/coverage-v8": "^4.0.16",
         "tsup": "8.5.1",
         "typescript": "5.9.3",
         "vitest": "4.0.16"
