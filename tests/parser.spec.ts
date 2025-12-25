@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { parseN8n } from '../src/parser/parser-n8n';
-import fs from 'fs';
-import path from 'path';
+import fs from 'node:fs';
+import path from 'node:path';
 import { ValidationError } from '../src/schemas';
 
 describe('N8n Parser', () => {
