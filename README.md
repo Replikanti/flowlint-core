@@ -1,5 +1,7 @@
 ﻿# @replikanti/flowlint-core
 
+![Coverage](https://img.shields.io/badge/coverage-90%25-green)
+
 Core linting engine for n8n workflows. This package provides the fundamental building blocks for analyzing and validating n8n workflow files.
 
 ## Installation
@@ -24,7 +26,7 @@ const findings = runAllRules(workflow, {
 
 // Process findings
 findings.forEach(finding => {
-  console.log([${finding.severity.toUpperCase()}] ${finding.rule}: ${finding.message});
+  console.log(`[\${finding.severity.toUpperCase()}] \${finding.rule}: \${finding.message}`);
 });
 ```
 
@@ -47,6 +49,14 @@ findings.forEach(finding => {
 ### Validation
 
 - `validateN8nWorkflow(data: unknown): void` - Validate workflow structure
+
+## Testing
+
+Run tests with coverage reporting:
+
+```bash
+npm run test:coverage
+```
 
 ## Rules
 

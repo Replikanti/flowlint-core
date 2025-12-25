@@ -60,13 +60,19 @@ export function loadConfig(configPath?: string): FlowLintConfig {
   return loadConfigFromCwd();
 }
 
+// For testing purposes
+let fsOverride: any = null;
+export function setFs(fs: any) {
+  fsOverride = fs;
+}
+
 /**
  * Load config from a specific file path (Node.js only)
  */
 function loadConfigFromFile(configPath: string): FlowLintConfig {
   try {
     // Dynamic require to avoid bundling fs
-    const fs = require('fs');
+    const fs = fsOverride || require('node:fs');
     
     if (!fs.existsSync(configPath)) {
       return defaultConfig;
@@ -84,8 +90,8 @@ function loadConfigFromFile(configPath: string): FlowLintConfig {
  */
 function loadConfigFromCwd(): FlowLintConfig {
   try {
-    const fs = require('fs');
-    const path = require('path');
+    const fs = fsOverride || require('node:fs');
+    const path = require('node:path');
     
     const candidates = ['.flowlint.yml', '.flowlint.yaml', 'flowlint.config.yml'];
     const cwd = process.cwd();
