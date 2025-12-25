@@ -5,11 +5,11 @@ on:
 
 jobs:
   approve:
-    if: github.event.pull_request.user.login == 'renovate[bot]'
+    if: github.actor == 'renovate[bot]'
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
     steps:
-      - uses: hmarr/auto-approve-action@v4 # v4.0.0
+      - uses: hmarr/auto-approve-action@v4
         with:
           github-token: ${{ secrets.AUTO_APPROVE_PAT }}
