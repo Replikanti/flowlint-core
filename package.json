@@ -1,6 +1,6 @@
 {
     "name": "@replikanti/flowlint-core",
-    "version": "0.9.3",
+    "version": "0.9.4",
     "description": "Core linting engine for n8n workflows",
     "main": "dist/index.js",
     "module": "dist/index.mjs",
