@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.5](https://github.com/Replikanti/flowlint-core/compare/v0.9.4...v0.9.5) (2025-12-25)
+
+
+### Bug Fixes
+
+* **ci:** strictly use pull_request event for security (SQ fix) ([a327840](https://github.com/Replikanti/flowlint-core/commit/a3278401e8194d18ba7a9287cefcfbf12bd646b6))
+
 ## [0.9.4](https://github.com/Replikanti/flowlint-core/compare/v0.9.3...v0.9.4) (2025-12-25)
 
 
