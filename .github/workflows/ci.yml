@@ -8,6 +8,8 @@ on:
 jobs:
   CI:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
       - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
@@ -16,4 +18,13 @@ jobs:
           cache: 'npm'
       - run: npm ci
       - run: npm run test:coverage
+      - name: Update Coverage Badge
+        if: github.ref == 'refs/heads/main'
+        run: |
+          node scripts/update-badge.js
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          git diff --quiet && git diff --staged --quiet || git commit -m "docs: update coverage badge [skip ci]"
+          git push
       - run: npm run build
