@@ -8,6 +8,9 @@ on:
 jobs:
   CI:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
       - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v6
@@ -16,4 +19,18 @@ jobs:
           cache: 'npm'
       - run: npm ci
       - run: npm run test:coverage
+      - name: Update Coverage Badge
+        if: github.ref == 'refs/heads/main'
+        run: node scripts/update-badge.js
+      - name: Create Pull Request for Badge
+        if: github.ref == 'refs/heads/main'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "docs: update coverage badge"
+          title: "docs: update coverage badge"
+          body: "Automated update of coverage badge in README.md from CI."
+          branch: "docs/update-coverage-badge"
+          base: "main"
+          delete-branch: true
       - run: npm run build
