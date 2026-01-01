@@ -29,7 +29,7 @@ jobs:
         if: github.ref == 'refs/heads/main'
         uses: peter-evans/create-pull-request@v6
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.AUTO_APPROVE_PAT }}
           commit-message: "docs: update coverage badge"
           title: "docs: update coverage badge"
           body: "Automated update of coverage badge in README.md from CI."
