@@ -2,8 +2,8 @@ import { describe, it, expect } from 'vitest';
 import { runAllRules } from '../src/rules'; 
 import { parseN8n } from '../src/parser/parser-n8n';
 import { defaultConfig } from '../src/config';
-import fs from 'fs';
-import path from 'path';
+import path from 'node:path';
+import fs from 'node:fs';
 
 describe('Linting Engine', () => {
     const validJson = fs.readFileSync(path.join(__dirname, 'fixtures/valid-workflow.json'), 'utf-8');

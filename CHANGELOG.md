@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.9.5](https://github.com/Replikanti/flowlint-core/compare/v0.9.4...v0.9.5) (2025-12-25)
+
+
+### Bug Fixes
+
+* **ci:** strictly use pull_request event for security (SQ fix) ([a327840](https://github.com/Replikanti/flowlint-core/commit/a3278401e8194d18ba7a9287cefcfbf12bd646b6))
+
+## [0.9.4](https://github.com/Replikanti/flowlint-core/compare/v0.9.3...v0.9.4) (2025-12-25)
+
+
+### Bug Fixes
+
+* **core:** refactor tests/utils.spec.ts to reduce code duplication (FLT-62) ([30ff9f7](https://github.com/Replikanti/flowlint-core/commit/30ff9f78258119680580d581d0c32fc8394d97bb))
+* **core:** use node: prefix for built-in modules ([ede04ae](https://github.com/Replikanti/flowlint-core/commit/ede04ae0d24bcec0458897cb1c15ad9bd8263d1a))
+
 ## [0.9.3](https://github.com/Replikanti/flowlint-core/compare/v0.9.2...v0.9.3) (2025-12-22)
 
 
