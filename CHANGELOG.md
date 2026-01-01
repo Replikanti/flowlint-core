@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.9.6](https://github.com/Replikanti/flowlint-core/compare/v0.9.5...v0.9.6) (2026-01-01)
+
+
+### Bug Fixes
+
+* **scripts:** use ESM-compatible __dirname ([386f1c0](https://github.com/Replikanti/flowlint-core/commit/386f1c0c25238d01cd1f03712580dc0eb6ab9cdf))
+* **scripts:** use node: prefix for built-in imports ([fdff06d](https://github.com/Replikanti/flowlint-core/commit/fdff06ddc6d26d3c1e0032c8647eb4631b44a4b1))
+
 ## [0.9.5](https://github.com/Replikanti/flowlint-core/compare/v0.9.4...v0.9.5) (2025-12-25)
 
 
