@@ -1,6 +1,6 @@
 ﻿# @replikanti/flowlint-core
 
-![Coverage](https://img.shields.io/badge/coverage-75%25-yellow)
+![Coverage](https://img.shields.io/badge/coverage-86.48%25-green)
 
 Core static analysis engine for [n8n](https://n8n.io) workflows. This package contains the parser, rules engine, and default rule definitions.
 
