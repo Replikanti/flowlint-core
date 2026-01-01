@@ -1,6 +1,8 @@
 ﻿# @replikanti/flowlint-core
 
-Core linting engine for n8n workflows. This package provides the fundamental building blocks for analyzing and validating n8n workflow files.
+![Coverage](https://img.shields.io/badge/coverage-75%25-yellow)
+
+Core static analysis engine for [n8n](https://n8n.io) workflows. This package contains the parser, rules engine, and default rule definitions.
 
 ## Installation
 
