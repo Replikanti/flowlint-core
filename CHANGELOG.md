@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.0](https://github.com/Replikanti/flowlint-core/compare/v0.9.6...v0.10.0) (2026-01-02)
+
+
+### Features
+
+* **ci:** implement auto-merge coverage badge workflow ([e1cc658](https://github.com/Replikanti/flowlint-core/commit/e1cc658affe74ed20d6b9c90d49d563f5e607631))
+
 ## [0.9.6](https://github.com/Replikanti/flowlint-core/compare/v0.9.5...v0.9.6) (2026-01-01)
 
 
