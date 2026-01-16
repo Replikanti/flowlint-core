@@ -50,7 +50,7 @@
     },
     "devDependencies": {
         "@types/micromatch": "4.0.10",
-        "@types/node": "24.10.7",
+        "@types/node": "24.10.8",
         "@vitest/coverage-v8": "4.0.17",
         "tsup": "8.5.1",
         "typescript": "5.9.3",
