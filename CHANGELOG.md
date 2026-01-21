@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.11.0](https://github.com/Replikanti/flowlint-core/compare/v0.10.0...v0.11.0) (2026-01-21)
+
+
+### Features
+
+* **rules:** add support for custom external rules ([dab425c](https://github.com/Replikanti/flowlint-core/commit/dab425c00ad310f59c376a1c43ba89cc6370cd61))
+* **rules:** add support for custom external rules ([fa538ac](https://github.com/Replikanti/flowlint-core/commit/fa538ac2ff689b211a6168e41d0d3206d199e96c))
+
 ## [0.10.0](https://github.com/Replikanti/flowlint-core/compare/v0.9.6...v0.10.0) (2026-01-02)
 
 
