@@ -137,3 +137,9 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# Ralph state files (only PROMPT.md and guardrails.md are tracked)
+.ralph/state.md
+.ralph/progress.md
+.ralph/failures.md
+.ralph/context-log.md
