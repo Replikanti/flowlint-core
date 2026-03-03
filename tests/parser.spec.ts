@@ -45,4 +45,25 @@ connections:
         // But "{ broken" is invalid JSON and invalid YAML if it looks like flow mapping.
         expect(() => parseN8n('{ "broken": ')).toThrow();
     });
+
+    it('AC7: should capture settings.errorWorkflow in meta', () => {
+        const workflow = JSON.stringify({
+            nodes: [{ id: '1', type: 'n8n-nodes-base.webhook', name: 'Webhook', parameters: {} }],
+            connections: {},
+            settings: { errorWorkflow: 'abc123' },
+        });
+        const graph = parseN8n(workflow);
+        const settings = graph.meta.settings as { errorWorkflow?: string } | undefined;
+        expect(settings).toBeDefined();
+        expect(settings!.errorWorkflow).toBe('abc123');
+    });
+
+    it('AC8: should have undefined settings when workflow has no settings', () => {
+        const workflow = JSON.stringify({
+            nodes: [{ id: '1', type: 'n8n-nodes-base.webhook', name: 'Webhook', parameters: {} }],
+            connections: {},
+        });
+        const graph = parseN8n(workflow);
+        expect(graph.meta.settings).toBeUndefined();
+    });
 });

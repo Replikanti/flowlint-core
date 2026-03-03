@@ -15,6 +15,7 @@ import { r11DeprecatedNodes } from './lib/r11-deprecated-nodes';
 import { r12UnhandledErrorPath } from './lib/r12-unhandled-error-path';
 import { r13WebhookAcknowledgment } from './lib/r13-webhook-acknowledgment';
 import { r14RetryAfterCompliance } from './lib/r14-retry-after-compliance';
+import { r15ErrorHandlerSetInSettings } from './lib/r15-error-handler-set-in-settings';
 
 export type RuleContext = { path: string; cfg: FlowLintConfig; nodeLines?: Record<string, number> };
 
@@ -33,6 +34,7 @@ const rules: RuleRunner[] = [
   r12UnhandledErrorPath,
   r13WebhookAcknowledgment,
   r14RetryAfterCompliance,
+  r15ErrorHandlerSetInSettings,
 ];
 
 export function runAllRules(
