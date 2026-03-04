@@ -68,6 +68,10 @@ export interface RetryAfterComplianceConfig {
   suggest_jitter?: boolean;
 }
 
+export interface ErrorHandlerSetInSettingsConfig {
+  enabled: boolean;
+}
+
 export interface RulesConfig {
   rate_limit_retry: RateLimitRetryConfig;
   error_handling: ErrorHandlingConfig;
@@ -83,6 +87,7 @@ export interface RulesConfig {
   config_literals: ConfigLiteralsConfig;
   webhook_acknowledgment: WebhookAcknowledgmentConfig;
   retry_after_compliance: RetryAfterComplianceConfig;
+  error_handler_set_in_settings: ErrorHandlerSetInSettingsConfig;
 }
 
 export interface FilesConfig {
@@ -169,5 +174,6 @@ export const defaultConfig: FlowLintConfig = {
       suggest_exponential_backoff: true,
       suggest_jitter: true,
     },
+    error_handler_set_in_settings: { enabled: true },
   },
 };

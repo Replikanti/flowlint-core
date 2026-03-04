@@ -210,6 +210,15 @@ export function findAllUpstreamNodes(graph: Graph, startNodeId: string): Set<str
   return visited;
 }
 
+export function isMainWorkflow(graph: Graph): boolean {
+  return graph.nodes.some(
+    (node) =>
+      /trigger|webhook|schedule|form|\bstart\b/i.test(node.type) &&
+      !/executeworkflow/i.test(node.type) &&
+      !/manualTrigger/i.test(node.type),
+  );
+}
+
 export const EXAMPLES_BASE_URL = "https://github.com/Replikanti/flowlint-examples/tree/main";
 
 export function getExampleLink(ruleId: string): string {

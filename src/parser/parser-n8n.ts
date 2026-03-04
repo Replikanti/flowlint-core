@@ -124,6 +124,7 @@ export function parseN8n(doc: string): Graph {
     meta: {
       credentials: !!parsed.credentials,
       nodeLines: Object.fromEntries(nodeLines),
+      settings: parsed.settings,
     },
   };
 }

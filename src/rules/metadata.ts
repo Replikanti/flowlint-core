@@ -12,6 +12,7 @@ import { metadata as r11 } from './lib/r11-deprecated-nodes';
 import { metadata as r12 } from './lib/r12-unhandled-error-path';
 import { metadata as r13 } from './lib/r13-webhook-acknowledgment';
 import { metadata as r14 } from './lib/r14-retry-after-compliance';
+import { metadata as r15 } from './lib/r15-error-handler-set-in-settings';
 
 export interface RuleMetadata {
   id: string;
@@ -36,6 +37,7 @@ export const RULES_METADATA: RuleMetadata[] = [
   r12,
   r13,
   r14,
+  r15,
 ];
 
 
