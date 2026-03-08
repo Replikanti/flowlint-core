@@ -238,14 +238,20 @@ describe('New workflow rules (R7-R12)', () => {
       meta: Record<string, unknown> = {},
     ): Graph => ({ nodes, edges: [], meta });
 
+    const checkR15 = (graph: Graph, disableRule = false) => {
+      const cfg = cloneConfig();
+      if (disableRule) {
+        cfg.rules.error_handler_set_in_settings.enabled = false;
+      }
+      return runAllRules(graph, { path: 'test.json', cfg }).find((f) => f.rule === 'R15');
+    };
+
     it('AC1: flags main workflow (webhook) without errorWorkflow', () => {
       const graph = makeGraph(
         [{ id: '1', type: 'n8n-nodes-base.webhook', name: 'Webhook' }],
         {},
       );
-      const cfg = cloneConfig();
-      const findings = runAllRules(graph, { path: 'test.json', cfg });
-      const r15 = findings.find((f) => f.rule === 'R15');
+      const r15 = checkR15(graph);
       expect(r15).toBeDefined();
       expect(r15!.severity).toBe('must');
     });
@@ -255,10 +261,7 @@ describe('New workflow rules (R7-R12)', () => {
         [{ id: '1', type: 'n8n-nodes-base.scheduleTrigger', name: 'Schedule' }],
         { settings: { errorWorkflow: 'some-workflow-id' } },
       );
-      const cfg = cloneConfig();
-      const findings = runAllRules(graph, { path: 'test.json', cfg });
-      const r15 = findings.find((f) => f.rule === 'R15');
-      expect(r15).toBeUndefined();
+      expect(checkR15(graph)).toBeUndefined();
     });
 
     it('AC3: passes sub-workflow (Execute Workflow Trigger)', () => {
@@ -266,20 +269,14 @@ describe('New workflow rules (R7-R12)', () => {
         [{ id: '1', type: 'n8n-nodes-base.executeWorkflowTrigger', name: 'Execute Workflow Trigger' }],
         {},
       );
-      const cfg = cloneConfig();
-      const findings = runAllRules(graph, { path: 'test.json', cfg });
-      const r15 = findings.find((f) => f.rule === 'R15');
-      expect(r15).toBeUndefined();
+      expect(checkR15(graph)).toBeUndefined();
     });
 
     it('AC4: flags main workflow (form) without settings at all', () => {
       const graph = makeGraph(
         [{ id: '1', type: 'n8n-nodes-base.formTrigger', name: 'Form' }],
       );
-      const cfg = cloneConfig();
-      const findings = runAllRules(graph, { path: 'test.json', cfg });
-      const r15 = findings.find((f) => f.rule === 'R15');
-      expect(r15).toBeDefined();
+      expect(checkR15(graph)).toBeDefined();
     });
 
     it('AC5: passes when rule is disabled', () => {
@@ -287,11 +284,7 @@ describe('New workflow rules (R7-R12)', () => {
         [{ id: '1', type: 'n8n-nodes-base.webhook', name: 'Webhook' }],
         {},
       );
-      const cfg = cloneConfig();
-      cfg.rules.error_handler_set_in_settings.enabled = false;
-      const findings = runAllRules(graph, { path: 'test.json', cfg });
-      const r15 = findings.find((f) => f.rule === 'R15');
-      expect(r15).toBeUndefined();
+      expect(checkR15(graph, true)).toBeUndefined();
     });
 
     it('AC6: passes workflow without trigger nodes', () => {
@@ -299,10 +292,7 @@ describe('New workflow rules (R7-R12)', () => {
         [{ id: '1', type: 'n8n-nodes-base.set', name: 'Set' }],
         {},
       );
-      const cfg = cloneConfig();
-      const findings = runAllRules(graph, { path: 'test.json', cfg });
-      const r15 = findings.find((f) => f.rule === 'R15');
-      expect(r15).toBeUndefined();
+      expect(checkR15(graph)).toBeUndefined();
     });
 
     it('AC6b: passes workflow with Manual Trigger only', () => {
@@ -310,10 +300,7 @@ describe('New workflow rules (R7-R12)', () => {
         [{ id: '1', type: 'n8n-nodes-base.manualTrigger', name: 'Manual Trigger' }],
         {},
       );
-      const cfg = cloneConfig();
-      const findings = runAllRules(graph, { path: 'test.json', cfg });
-      const r15 = findings.find((f) => f.rule === 'R15');
-      expect(r15).toBeUndefined();
+      expect(checkR15(graph)).toBeUndefined();
     });
   });
 });
