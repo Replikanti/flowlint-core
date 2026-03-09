@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.0](https://github.com/Replikanti/flowlint-core/compare/v0.11.0...v0.12.0) (2026-03-09)
+
+
+### Features
+
+* add r15 to check all flows beside one triggered by 'When executed by another workflow' trigger for setting error handler ([15c21dc](https://github.com/Replikanti/flowlint-core/commit/15c21dcf9f12f2c7481a42b3338654516c95140a))
+
 ## [0.11.0](https://github.com/Replikanti/flowlint-core/compare/v0.10.0...v0.11.0) (2026-01-21)
 
 
