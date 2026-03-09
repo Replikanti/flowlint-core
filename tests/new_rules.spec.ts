@@ -1,6 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { buildStopAndErrorGraphFixture } from './helpers/stop-and-error-fixture';
-import { createSimpleGraph, analyzeGraph } from './helpers/graph-utils';
+import { createSimpleGraph, analyzeGraph, cloneConfig } from './helpers/graph-utils';
+import { runAllRules } from '../src/rules';
+import type { Graph } from '../src/types';
 
 describe('New workflow rules (R7-R12)', () => {
   describe('R7: alert_log_enforcement', () => {
@@ -227,6 +229,78 @@ describe('New workflow rules (R7-R12)', () => {
 
       expect(finding).toBeDefined();
       expect(finding!.message).toContain('ignores Retry-After headers');
+    });
+  });
+
+  describe('R15: error_handler_set_in_settings', () => {
+    const makeGraph = (
+      nodes: Array<{ id: string; type: string; name?: string }>,
+      meta: Record<string, unknown> = {},
+    ): Graph => ({ nodes, edges: [], meta });
+
+    const checkR15 = (graph: Graph, disableRule = false) => {
+      const cfg = cloneConfig();
+      if (disableRule) {
+        cfg.rules.error_handler_set_in_settings.enabled = false;
+      }
+      return runAllRules(graph, { path: 'test.json', cfg }).find((f) => f.rule === 'R15');
+    };
+
+    it('AC1: flags main workflow (webhook) without errorWorkflow', () => {
+      const graph = makeGraph(
+        [{ id: '1', type: 'n8n-nodes-base.webhook', name: 'Webhook' }],
+        {},
+      );
+      const r15 = checkR15(graph);
+      expect(r15).toBeDefined();
+      expect(r15!.severity).toBe('must');
+    });
+
+    it('AC2: passes main workflow (schedule) with errorWorkflow set', () => {
+      const graph = makeGraph(
+        [{ id: '1', type: 'n8n-nodes-base.scheduleTrigger', name: 'Schedule' }],
+        { settings: { errorWorkflow: 'some-workflow-id' } },
+      );
+      expect(checkR15(graph)).toBeUndefined();
+    });
+
+    it('AC3: passes sub-workflow (Execute Workflow Trigger)', () => {
+      const graph = makeGraph(
+        [{ id: '1', type: 'n8n-nodes-base.executeWorkflowTrigger', name: 'Execute Workflow Trigger' }],
+        {},
+      );
+      expect(checkR15(graph)).toBeUndefined();
+    });
+
+    it('AC4: flags main workflow (form) without settings at all', () => {
+      const graph = makeGraph(
+        [{ id: '1', type: 'n8n-nodes-base.formTrigger', name: 'Form' }],
+      );
+      expect(checkR15(graph)).toBeDefined();
+    });
+
+    it('AC5: passes when rule is disabled', () => {
+      const graph = makeGraph(
+        [{ id: '1', type: 'n8n-nodes-base.webhook', name: 'Webhook' }],
+        {},
+      );
+      expect(checkR15(graph, true)).toBeUndefined();
+    });
+
+    it('AC6: passes workflow without trigger nodes', () => {
+      const graph = makeGraph(
+        [{ id: '1', type: 'n8n-nodes-base.set', name: 'Set' }],
+        {},
+      );
+      expect(checkR15(graph)).toBeUndefined();
+    });
+
+    it('AC6b: passes workflow with Manual Trigger only', () => {
+      const graph = makeGraph(
+        [{ id: '1', type: 'n8n-nodes-base.manualTrigger', name: 'Manual Trigger' }],
+        {},
+      );
+      expect(checkR15(graph)).toBeUndefined();
     });
   });
 });
