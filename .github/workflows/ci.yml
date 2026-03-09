@@ -37,7 +37,7 @@ jobs:
       - name: Enable Auto-Merge with Admin Override
         if: steps.cpr.outputs.pull-request-number
         run: |
-          gh pr merge ${{ steps.cpr.outputs.pull-request-number }} --auto --squash --admin
+          gh pr merge ${{ steps.cpr.outputs.pull-request-number }} --squash --admin
         env:
           GH_TOKEN: ${{ secrets.AUTO_APPROVE_PAT }}
       - run: npm run build

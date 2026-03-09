@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.12.1](https://github.com/Replikanti/flowlint-core/compare/v0.12.0...v0.12.1) (2026-03-09)
+
+
+### Bug Fixes
+
+* **ci:** fix merge command flags in workflow ([05cebc3](https://github.com/Replikanti/flowlint-core/commit/05cebc30421fd21d0cc4537cb08b82b9d66ea2c4))
+* **ci:** remove conflicting --auto flag in merge command ([7044e3f](https://github.com/Replikanti/flowlint-core/commit/7044e3f869a93dcbe5508257f123444d57f945de))
+
+## [0.12.0](https://github.com/Replikanti/flowlint-core/compare/v0.11.0...v0.12.0) (2026-03-09)
+
+
+### Features
+
+* add r15 to check all flows beside one triggered by 'When executed by another workflow' trigger for setting error handler ([15c21dc](https://github.com/Replikanti/flowlint-core/commit/15c21dcf9f12f2c7481a42b3338654516c95140a))
+
 ## [0.11.0](https://github.com/Replikanti/flowlint-core/compare/v0.10.0...v0.11.0) (2026-01-21)
 
 
